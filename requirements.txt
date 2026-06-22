@@ -1,0 +1,49 @@
+# LLM
+langchain
+langchain-core
+langchain-community
+langchain-mistralai
+
+# Agent Framework
+langgraph
+
+# Search Tool
+tavily-python
+
+# Web Scraping
+beautifulsoup4
+lxml
+
+# HTTP Requests
+requests
+
+# Environment Variables
+python-dotenv
+
+# Data Handling
+pandas
+numpy
+
+# Output Formatting / Debugging
+rich
+
+# Validation
+pydantic
+
+# Async Support
+aiohttp
+
+# Token Counting
+tiktoken
+
+# Optional LangSmith Tracing
+langsmith
+
+# HTML Parsing Helpers
+html5lib
+
+# Retry Logic
+tenacity
+
+# UI
+streamlit
