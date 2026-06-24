@@ -4,7 +4,6 @@ Run with:  streamlit run app.py
 """
 
 import streamlit as st
-import streamlit.components.v1 as components
 import re
 from pathlib import Path
 from pipeline import run_research_pipeline
