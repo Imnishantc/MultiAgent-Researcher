@@ -54,7 +54,7 @@ docker run -p 8501:8501 --env-file .env multiagent-researcher
 The application will be available at:
 
 ```text
-http://localhost:8501
+https://multiagent-researcher.onrender.com/
 ```
 
 ---
