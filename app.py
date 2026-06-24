@@ -4,7 +4,9 @@ Run with:  streamlit run app.py
 """
 
 import streamlit as st
+import streamlit.components.v1 as components
 import re
+from pathlib import Path
 from pipeline import run_research_pipeline
 
 # ── Page Config ──────────────────────────────────────────────────────────
@@ -14,6 +16,41 @@ st.set_page_config(
     page_icon="🔬",
     layout="wide",
     initial_sidebar_state="collapsed",
+)
+
+# ── Cosmic Dust Background ───────────────────────────────────────────────
+
+import base64
+
+cosmic_dust_path = Path(__file__).parent / "cosmic_dust.html"
+cosmic_dust_html = cosmic_dust_path.read_text(encoding="utf-8")
+cosmic_dust_b64 = base64.b64encode(cosmic_dust_html.encode("utf-8")).decode("utf-8")
+
+# Inject the Three.js scene as a fixed full-page background iframe
+st.markdown(
+    f"""
+    <style>
+        .cosmic-bg-container {{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }}
+        .cosmic-bg-container iframe {{
+            width: 100%;
+            height: 100%;
+            border: none;
+        }}
+    </style>
+    <div class="cosmic-bg-container">
+        <iframe src="data:text/html;base64,{cosmic_dust_b64}"
+                scrolling="no" frameborder="0"></iframe>
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
 
 # ── Custom CSS ───────────────────────────────────────────────────────────
@@ -33,9 +70,33 @@ st.markdown("""
         --border: rgba(255, 255, 255, 0.06);
     }
 
-    /* ── Global ───────────────────────────────────────────────────── */
+    /* ── Transparent Backgrounds for Cosmic Dust ──────────────────── */
     .stApp {
         font-family: 'Inter', sans-serif;
+        background: transparent !important;
+    }
+
+    .stApp > header {
+        background: transparent !important;
+    }
+
+    .stMainBlockContainer,
+    .block-container,
+    [data-testid="stAppViewContainer"],
+    [data-testid="stHeader"],
+    section[data-testid="stSidebar"],
+    .main .block-container {
+        background: transparent !important;
+    }
+
+    /* Subtle glass overlay for readability */
+    .main .block-container {
+        background: rgba(0, 0, 0, 0.45) !important;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-radius: 16px;
+        padding: 2rem !important;
+        margin-top: 1rem;
     }
 
     /* ── Header ───────────────────────────────────────────────────── */
@@ -74,7 +135,7 @@ st.markdown("""
         font-weight: 800;
         letter-spacing: -0.03em;
         line-height: 1.1;
-        background: linear-gradient(135deg, #6c5ce7, #a855f7, #ec4899);
+        background: linear-gradient(135deg, #ff7a2a, #ffce5a, #ffc46b);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -83,7 +144,7 @@ st.markdown("""
 
     .hero-sub {
         font-size: 1rem;
-        color: #8b8b9e;
+        color: #c0a08a;
         margin: 0;
         font-weight: 400;
     }
@@ -97,26 +158,27 @@ st.markdown("""
     }
 
     .step-box {
-        background: var(--glass);
-        border: 1px solid var(--border);
+        background: rgba(26, 10, 4, 0.55);
+        border: 1px solid rgba(255, 122, 42, 0.12);
         border-radius: 14px;
         padding: 1.2rem 0.8rem;
         text-align: center;
         transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        backdrop-filter: blur(6px);
     }
 
     .step-box.waiting { opacity: 0.4; }
 
     .step-box.running {
-        border-color: var(--accent);
+        border-color: #ff7a2a;
         opacity: 1;
-        box-shadow: 0 0 20px rgba(108, 92, 231, 0.25), 0 0 60px rgba(108, 92, 231, 0.08);
+        box-shadow: 0 0 20px rgba(255, 122, 42, 0.25), 0 0 60px rgba(255, 122, 42, 0.08);
         animation: glow-pulse 2s ease-in-out infinite;
     }
 
     @keyframes glow-pulse {
-        0%, 100% { box-shadow: 0 0 20px rgba(108, 92, 231, 0.25); }
-        50% { box-shadow: 0 0 35px rgba(108, 92, 231, 0.4); }
+        0%, 100% { box-shadow: 0 0 20px rgba(255, 122, 42, 0.25); }
+        50% { box-shadow: 0 0 35px rgba(255, 122, 42, 0.4); }
     }
 
     .step-box.done {
@@ -138,7 +200,7 @@ st.markdown("""
     }
 
     .waiting .step-num { background: rgba(255,255,255,0.05); color: #555; }
-    .running .step-num { background: var(--accent); color: #fff; }
+    .running .step-num { background: #ff7a2a; color: #fff; }
     .done .step-num    { background: var(--success); color: #fff; }
 
     .step-label {
@@ -155,7 +217,7 @@ st.markdown("""
     }
 
     .waiting .step-status { color: #55556a; }
-    .running .step-status { color: var(--accent-light); }
+    .running .step-status { color: #ff9a5a; }
     .done .step-status    { color: var(--success); }
 
     /* ── Spinner ──────────────────────────────────────────────────── */
@@ -172,14 +234,14 @@ st.markdown("""
     /* ── Score Badge ──────────────────────────────────────────────── */
     .score-badge {
         display: inline-block;
-        background: linear-gradient(135deg, #6c5ce7, #a855f7);
+        background: linear-gradient(135deg, #ff7a2a, #ffce5a);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
         font-size: 1.6rem;
         font-weight: 800;
         padding: 4px 14px;
-        border: 1px solid rgba(108, 92, 231, 0.3);
+        border: 1px solid rgba(255, 122, 42, 0.3);
         border-radius: 8px;
     }
 
@@ -187,10 +249,43 @@ st.markdown("""
     .section-label {
         font-size: 0.75rem;
         font-weight: 600;
-        color: #8b8b9e;
+        color: #c0a08a;
         letter-spacing: 0.06em;
         text-transform: uppercase;
         margin-bottom: 0.75rem;
+    }
+
+    /* ── Streamlit Element Overrides for transparency ─────────────── */
+    .stTextInput > div > div {
+        background: rgba(26, 10, 4, 0.6) !important;
+        border-color: rgba(255, 122, 42, 0.2) !important;
+    }
+
+    .stButton > button[kind="primary"] {
+        background: linear-gradient(135deg, #ff7a2a, #ffce5a) !important;
+        border: none !important;
+        color: #1a0a04 !important;
+        font-weight: 700 !important;
+    }
+
+    .stButton > button[kind="primary"]:hover {
+        box-shadow: 0 0 20px rgba(255, 122, 42, 0.4) !important;
+    }
+
+    div[data-testid="stExpander"] {
+        background: rgba(26, 10, 4, 0.5) !important;
+        border-color: rgba(255, 122, 42, 0.15) !important;
+        border-radius: 12px;
+        backdrop-filter: blur(4px);
+    }
+
+    .stAlert {
+        background: rgba(26, 10, 4, 0.5) !important;
+        backdrop-filter: blur(4px);
+    }
+
+    hr {
+        border-color: rgba(255, 122, 42, 0.15) !important;
     }
 
     /* ── Responsive ───────────────────────────────────────────────── */
@@ -272,7 +367,6 @@ def render_steps(statuses):
 
 st.markdown("""
 <div style="text-align:center; margin-bottom:2rem;">
-    <div class="hero-badge"><span class="hero-badge-dot"></span> Multi-Agent System</div>
     <h1 class="hero-title">MultiAgent Researcher</h1>
     <p class="hero-sub">Enter a topic and watch AI agents search, scrape, write, and critique a research report.</p>
 </div>
