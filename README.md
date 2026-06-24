@@ -53,7 +53,7 @@ docker run -p 8501:8501 --env-file .env multiagent-researcher
 
 The application will be available at:
 
-[MultiAgent Researcher](https://multiagent-researcher.onrender.com/)]
+[MultiAgent Researcher](https://multiagent-researcher.onrender.com/)
 
 
 ---
